@@ -1,0 +1,265 @@
+swagger: "2.0"
+info:
+  description: |
+    This is an api for "RSS Feed Aggregator".
+
+    [View Subject](https://intra.epitech.eu/module/2016/M-EAP-650/PAR-9-1/acti-235029/project/file/RSS-feed-aggregator.pdf) or [Messenger group](https://www.messenger.com/t/552069568251252)
+
+    A successfull login or signup generate a key usable to authenticate request
+
+    This key is owned by one account, a request providing an apiKey should get result for the user owning this key.
+
+  version: "1.0.0"
+  title: RSS Feed Aggregator
+schemes:
+  - http
+paths:
+  /users/signup:
+    post:
+      tags:
+        - user
+      summary: Signup with email and password
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: credentials
+          description: credentials
+          required: true
+          schema:
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Successful signup
+          schema:
+            properties:
+              apiKey:
+                type: string
+                description: used for authenticate future requests
+              userId:
+                type: number
+                description: userId for querying related items (feeds...)
+        "400":
+          description: Invalid email or password
+  /users/login:
+    post:
+      tags:
+        - user
+      summary: Login with email and password
+      description: ""
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: credentials
+          description: credentials
+          required: true
+          schema:
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        "200":
+          description: Successful login
+          schema:
+            properties:
+              apiKey:
+                type: string
+                description: used for authenticate future requests
+              userId:
+                type: number
+                description: userId for querying related items (feeds...)
+        "401":
+          description: Invalid credentials
+
+  /users/logout:
+    get:
+      tags:
+        - user
+      summary: Logs out current logged in user session
+      description: ""
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        default:
+          description: successful operation
+  /feeds:
+    get:
+      tags:
+        - feed
+      summary: Get all feeds subscribed by currend user
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Feed"
+        "400":
+          description: Invalid tag value
+      security:
+      - api_key: []
+    post:
+      tags:
+        - feed
+      summary: Suscribe to a feed by url (add it in database, and reference its id for current user)
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: feedUrl
+          description: url of feed that user want to subscribe
+          required: true
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            type: number
+            description: id of subscribed feed
+        "400":
+          description: url doesn't correspond to valid rss file
+        "404":
+          description: url inaccessible
+    delete:
+      tags:
+        - feed
+      summary: Unsuscribe to a feed by url (keep it in database, juste remove reference for user)
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: feedId
+          description: ID of feed that user want to unsubscribe
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: successful unsubscribed
+        "404":
+          description: feed doesn't exist
+
+  /feeds/{feedId}:
+    get:
+      tags:
+        - feed
+      summary: Find a feed and retrieve its articles
+      description: Returns id and titles of articles of this feed
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: feedId
+          description: ID of feed that needs to be fetched
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "404":
+          description: feed not found
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/Feed"
+        "400":
+          description: Invalid ID supplied
+      security:
+        - api_key: []
+
+  /articles/{feedId}/{articleId}:
+    get:
+      tags:
+        - article
+      summary: retrieve article feed id and article id (id correspond to 1st, 2nd, 3rd, 4th... article)
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: feedId
+          description: ID of feed containing article
+          required: true
+          type: string
+        - in: path
+          name: articleId
+          description: ID of article to retrieve
+          required: true
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          schema:
+            $ref: "#/definitions/Article"
+        "400":
+          description: Invalid Order
+      security:
+      - api_key: []
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  User:
+    type: object
+    required:
+     - email
+     - password
+    properties:
+      id:
+        type: integer
+      email:
+        type: string
+      password:
+        type: string
+  Feed:
+    type: object
+    required:
+      - url
+    properties:
+      id:
+        type: integer
+      url:
+        type: string
+        description: url to download feed
+      title:
+        type: string
+      link:
+        type: string
+        description: url of blog corresponding to feed
+      description:
+        type: string
+      language:
+        type: string
+        description: ISO_639-1 language code
+  Article:
+    type: object
+    required:
+      - title
+    properties:
+      id:
+        type: integer
+      title:
+        type: string
+      link:
+        type: string
+      description:
+        type: string
+      pubdate:
+        type: string
+        format: date-time
