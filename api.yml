@@ -176,7 +176,15 @@ paths:
         "200":
           description: successful operation
           schema:
-            $ref: "#/definitions/Feed"
+            description: list of articles in the feed
+            type: array
+            items:
+              properties:
+                id:
+                  type: integer
+                title:
+                  type: string
+                  description: title of article
         "400":
           description: Invalid ID supplied
       security:
