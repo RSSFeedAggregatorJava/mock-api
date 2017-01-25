@@ -11,10 +11,15 @@ module.exports = function(grunt) {
         options: {
           keepalive: true,
           middleware: [
+	    function(req, res, next) {
+		res.setHeader('Access-Control-Allow-Origin', '*');
+		res.setHeader('Access-Control-Allow-Methods', '*');
+		next();
+	    },
             mockApi({
                   swaggerFile: path.join(__dirname, 'api.yml'),
                   watch: false // enable reloading the routes and schemas when the swagger file changes
-              })
+            }),
           ],
         },
       },
