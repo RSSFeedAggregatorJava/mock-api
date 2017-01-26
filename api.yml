@@ -106,11 +106,17 @@ paths:
         - application/json
       responses:
         "200":
-          description: successful operation
+          description: the lisT of feedS subscribed by user
           schema:
             type: array
             items:
-              $ref: "#/definitions/Feed"
+              properties:
+                id:
+                  type: integer
+                title:
+                  type: string
+                  description: title of FEED
+
         "400":
           description: Invalid tag value
       security:
@@ -190,6 +196,36 @@ paths:
       security:
         - api_key: []
 
+  /articles/{feedId}:
+    get:
+      tags:
+        - article
+      summary: retrieve the lisT of articles in the feed
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: feedId
+          description: ID of feed containing article
+          required: true
+          type: string
+      responses:
+        "200":
+          description: list of articles in the feed
+          schema:
+            type: array
+            items:
+              properties:
+                id:
+                  type: integer
+                title:
+                  type: string
+                  description: title of article
+        "400":
+          description: Invalid Order
+      security:
+      - api_key: []
+
   /articles/{feedId}/{articleId}:
     get:
       tags:
@@ -238,36 +274,82 @@ definitions:
   Feed:
     type: object
     required:
+      - id
       - url
+      - description
+      - link
+      - title
     properties:
       id:
         type: integer
       url:
         type: string
         description: url to download feed
-      title:
+      category:
         type: string
-      link:
+      copyright: 
         type: string
-        description: url of blog corresponding to feed
       description:
+        type: string
+      docs:
+        type: string
+      generator:
+        type: string
+      image:
         type: string
       language:
         type: string
         description: ISO_639-1 language code
+      lastBuildDate:
+        type: string
+      link:
+        type: string
+        description: url of blog corresponding to feed
+      managingEditor:
+        type: string
+      pubDate:
+        type: string
+      rating:
+        type: string
+      title:
+        type: string
+      webMaster:
+        type: string
   Article:
     type: object
     required:
+      - id
+      - description
+      - link
       - title
     properties:
       id:
         type: integer
-      title:
+      author:
         type: string
-      link:
+      category:
+        type: string
+      comments:
         type: string
       description:
+        type: string
+      enclosure:
+        type: object
+        properties:
+          length: 
+            type: number
+          type:
+            type: string
+          url:
+            type: string
+      guid:
+        type: string
+      link:
         type: string
       pubdate:
         type: string
         format: date-time
+      source:
+        type: string
+      title:
+        type: string
